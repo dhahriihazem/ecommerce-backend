@@ -235,6 +235,262 @@
                     }
                 }
             }
+        },
+        "/api/products": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get list of all products",
+                "description": "Returns a paginated list of all products, including their type-specific attributes.",
+                "operationId": "getProductsList",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ProductResource"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Create a new product",
+                "description": "Creates a new product. Requires authentication.",
+                "operationId": "storeProduct",
+                "requestBody": {
+                    "description": "Product data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "description",
+                                    "type"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "New Gaming PC"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "A very fast gaming PC."
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "fixed_price",
+                                            "auction"
+                                        ],
+                                        "example": "fixed_price"
+                                    },
+                                    "price": {
+                                        "description": "Required if type is 'fixed_price'.",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1999.99
+                                    },
+                                    "stock_quantity": {
+                                        "description": "Required if type is 'fixed_price'.",
+                                        "type": "integer",
+                                        "example": 50
+                                    },
+                                    "starting_price": {
+                                        "description": "Required if type is 'auction'.",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1500
+                                    },
+                                    "auction_end_time": {
+                                        "description": "Required if type is 'auction'.",
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-01-01T00:00:00Z"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Product created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProductResource"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/products/{product}": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get a single product's details",
+                "description": "Returns the details of a single product by its ID. Uses route-model binding.",
+                "operationId": "getProductById",
+                "parameters": [
+                    {
+                        "name": "product",
+                        "in": "path",
+                        "description": "Product ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProductResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Resource Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Update an existing product",
+                "description": "Updates a product's details. Requires authentication.",
+                "operationId": "updateProduct",
+                "parameters": [
+                    {
+                        "name": "product",
+                        "in": "path",
+                        "description": "Product ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Product data to update. Note: changing 'type' is generally not recommended and may require sending all relevant fields for the new type.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProductResource"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Product updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProductResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Resource Not Found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Delete a product",
+                "description": "Deletes a product by its ID. Requires authentication.",
+                "operationId": "deleteProduct",
+                "parameters": [
+                    {
+                        "name": "product",
+                        "in": "path",
+                        "description": "Product ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "404": {
+                        "description": "Resource Not Found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -322,6 +578,73 @@
                     }
                 },
                 "type": "object"
+            },
+            "ProductResource": {
+                "title": "Product Resource",
+                "description": "Product resource model",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Vintage T-Shirt"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "A cool vintage t-shirt from the 90s."
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "fixed_price",
+                            "auction"
+                        ],
+                        "example": "fixed_price"
+                    },
+                    "price": {
+                        "description": "Present only for 'fixed_price' products.",
+                        "type": "number",
+                        "format": "float",
+                        "example": 29.99
+                    },
+                    "stock_quantity": {
+                        "description": "Present only for 'fixed_price' products.",
+                        "type": "integer",
+                        "example": 100
+                    },
+                    "starting_price": {
+                        "description": "Present only for 'auction' products.",
+                        "type": "number",
+                        "format": "float",
+                        "example": 50
+                    },
+                    "current_highest_bid": {
+                        "description": "Present only for 'auction' products.",
+                        "type": "number",
+                        "format": "float",
+                        "example": 75.5
+                    },
+                    "auction_end_time": {
+                        "description": "Present only for 'auction' products.",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-12-31T23:59:59.000000Z"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "type": "object"
             }
         },
         "securitySchemes": {
@@ -337,6 +660,10 @@
         {
             "name": "Authentication",
             "description": "Authentication"
+        },
+        {
+            "name": "Products",
+            "description": "Products"
         }
     ]
 }
