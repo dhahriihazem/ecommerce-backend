@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ProductType;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -53,5 +54,13 @@ class Product extends Model
     public function isAuction(): bool
     {
         return $this->type === ProductType::Auction;
+    }
+
+    /**
+     * Get the bids for the auction product.
+     */
+    public function bids(): HasMany
+    {
+        return $this->hasMany(Bid::class);
     }
 }

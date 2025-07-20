@@ -153,6 +153,84 @@
                 ]
             }
         },
+        "/api/products/{product}/bids": {
+            "post": {
+                "tags": [
+                    "Bidding"
+                ],
+                "summary": "Place a bid on an auction product",
+                "description": "Allows an authenticated user to place a bid on a product of type 'auction'. The bid must be higher than the current highest bid, and the auction must not have ended.",
+                "operationId": "placeBidOnProduct",
+                "parameters": [
+                    {
+                        "name": "product",
+                        "in": "path",
+                        "description": "The ID of the auction product",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "The amount for the bid",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "bid_amount"
+                                ],
+                                "properties": {
+                                    "bid_amount": {
+                                        "description": "Must be higher than the current highest bid.",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 99.99
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Bid placed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Bid placed successfully."
+                                        },
+                                        "bid": {
+                                            "$ref": "#/components/schemas/Bid"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Product not found"
+                    },
+                    "422": {
+                        "description": "Validation Error (e.g., bid is too low, auction has ended, or product is not an auction item)"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/auth/google/redirect": {
             "get": {
                 "tags": [
@@ -645,6 +723,43 @@
                     }
                 },
                 "type": "object"
+            },
+            "Bid": {
+                "title": "Bid",
+                "description": "Bid model",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "example": 1
+                    },
+                    "user_id": {
+                        "description": "The ID of the user who placed the bid",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "product_id": {
+                        "description": "The ID of the product being bid on",
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "bid_amount": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 85.5
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "type": "object"
             }
         },
         "securitySchemes": {
@@ -660,6 +775,10 @@
         {
             "name": "Authentication",
             "description": "Authentication"
+        },
+        {
+            "name": "Bidding",
+            "description": "Bidding"
         },
         {
             "name": "Products",

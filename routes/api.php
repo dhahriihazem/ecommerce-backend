@@ -2,6 +2,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\BidController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -28,4 +29,7 @@ Route::get('/user', fn(Request $request) => $request->user());
  
 // Product CRUD Routes (Create, Read, Update, Delete)
 Route::apiResource('products', ProductController::class);
+// Add this route for placing bids
+Route::post('/products/{product}/bids', [BidController::class, 'store'])
+    ->name('products.bids.store');
 });
