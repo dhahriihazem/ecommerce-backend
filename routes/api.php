@@ -3,6 +3,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\BidController;
+use App\Http\Controllers\Api\OrderController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -32,4 +33,7 @@ Route::apiResource('products', ProductController::class);
 // Add this route for placing bids
 Route::post('/products/{product}/bids', [BidController::class, 'store'])
     ->name('products.bids.store');
+
+// Order creation route
+Route::post('/orders', [OrderController::class, 'store']);
 });

@@ -36,5 +36,8 @@ return [
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
-
+    'myfatoorah' => [
+         'base_url' => env('MYFATOORAH_BASE_URL', 'https://apitest.myfatoorah.com'),
+         'api_key' => env('MYFATOORAH_API_KEY'),
+    ],
 ];

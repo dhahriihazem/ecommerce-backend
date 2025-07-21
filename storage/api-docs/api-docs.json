@@ -314,6 +314,262 @@
                 }
             }
         },
+        "/api/orders": {
+            "post": {
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Create a new order with multiple products",
+                "description": "Creates an order with one or more fixed-price products and initiates payment via MyFatoorah. Supports idempotency to prevent duplicate orders.",
+                "operationId": "createOrder",
+                "requestBody": {
+                    "description": "Order payload",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateOrder"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Order created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Order created successfully. Please proceed to payment."
+                                        },
+                                        "order_id": {
+                                            "type": "integer",
+                                            "example": 456
+                                        },
+                                        "payment_url": {
+                                            "type": "string",
+                                            "example": "https://demo.myfatoorah.com/payment/pay?invoiceId=inv_789"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "Existing order retrieved (idempotency)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Order already exists. Please proceed to payment."
+                                        },
+                                        "order_id": {
+                                            "type": "integer",
+                                            "example": 456
+                                        },
+                                        "payment_url": {
+                                            "type": "string",
+                                            "example": "https://demo.myfatoorah.com/payment/pay?invoiceId=inv_789"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation or business rule failure",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Not enough stock available for one or more products."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error when creating order or initiating payment",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to create order. Please try again."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/payment/callback/{order}": {
+            "get": {
+                "tags": [
+                    "Payment Callbacks"
+                ],
+                "summary": "Handle successful payment callback",
+                "description": "This is the callback URL for the MyFatoorah payment gateway to notify the system of a successful payment. It verifies the payment status and updates the order accordingly.",
+                "operationId": "handlePaymentCallback",
+                "parameters": [
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "description": "The ID of the order being paid.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "paymentId",
+                        "in": "query",
+                        "description": "The payment ID provided by MyFatoorah.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Payment successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Payment successful. Your order has been confirmed."
+                                        },
+                                        "order_id": {
+                                            "type": "integer",
+                                            "example": 123
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid callback (e.g., missing paymentId)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid payment callback."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Payment verification failed (e.g., payment not 'Paid')",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Payment was not successful."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error during verification",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred during payment verification. Please contact support."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/payment/error/{order}": {
+            "get": {
+                "tags": [
+                    "Payment Callbacks"
+                ],
+                "summary": "Handle failed or cancelled payment callback",
+                "description": "This is the error URL for the MyFatoorah payment gateway. It is called when a payment fails, is cancelled by the user, or encounters an error.",
+                "operationId": "handlePaymentError",
+                "parameters": [
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "description": "The ID of the order that failed.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "paymentId",
+                        "in": "query",
+                        "description": "The payment ID provided by MyFatoorah, if available.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Payment failed or was cancelled",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Payment was cancelled or failed. Please try again."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/products": {
             "get": {
                 "tags": [
@@ -657,6 +913,77 @@
                 },
                 "type": "object"
             },
+            "OrderItem": {
+                "required": [
+                    "product_id",
+                    "quantity"
+                ],
+                "properties": {
+                    "product_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "quantity": {
+                        "type": "integer",
+                        "example": 2
+                    }
+                },
+                "type": "object"
+            },
+            "CreateOrder": {
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OrderItem"
+                        }
+                    },
+                    "idempotency_key": {
+                        "description": "Optional client-generated idempotency key",
+                        "type": "string",
+                        "example": "unique-key-123"
+                    }
+                },
+                "type": "object"
+            },
+            "StoreOrderRequest": {
+                "title": "Store Order Request",
+                "required": [
+                    "items"
+                ],
+                "properties": {
+                    "items": {
+                        "description": "An array of products to include in the order.",
+                        "type": "array",
+                        "items": {
+                            "required": [
+                                "product_id",
+                                "quantity"
+                            ],
+                            "properties": {
+                                "product_id": {
+                                    "description": "The ID of the product.",
+                                    "type": "integer",
+                                    "example": 1
+                                },
+                                "quantity": {
+                                    "description": "The quantity of the product.",
+                                    "type": "integer",
+                                    "example": 2
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "idempotency_key": {
+                        "description": "A unique key to prevent duplicate order creation on network retries.",
+                        "type": "string",
+                        "example": "unique-key-for-this-purchase-123",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
             "ProductResource": {
                 "title": "Product Resource",
                 "description": "Product resource model",
@@ -772,6 +1099,14 @@
         }
     },
     "tags": [
+        {
+            "name": "Orders",
+            "description": "Order processing operations"
+        },
+        {
+            "name": "Payment Callbacks",
+            "description": "Endpoints for handling payment gateway callbacks. These are not intended for direct use by API clients."
+        },
         {
             "name": "Authentication",
             "description": "Authentication"

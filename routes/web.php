@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,3 +17,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/payment/callback/{order}', [PaymentController::class, 'callback'])
+     ->name('payment.callback');
+Route::get('/payment/error/{order}', [PaymentController::class, 'handleError'])
+     ->name('payment.error');
