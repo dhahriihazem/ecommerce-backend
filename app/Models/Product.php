@@ -26,6 +26,7 @@ class Product extends Model
         'starting_price',
         'current_highest_bid',
         'auction_end_time',
+        'auction_concluded_at',
     ];
 
     /**
@@ -36,6 +37,7 @@ class Product extends Model
     protected $casts = [
         'type' => ProductType::class,
         'auction_end_time' => 'datetime',
+        'auction_concluded_at' => 'datetime',
         'price' => 'decimal:2',
         'starting_price' => 'decimal:2',
         'current_highest_bid' => 'decimal:2',
@@ -74,4 +76,5 @@ class Product extends Model
             ->withPivot('quantity', 'price')
             ->withTimestamps();
     }
+    
 }
